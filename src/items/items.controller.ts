@@ -2,7 +2,6 @@ import { ItemsService } from './items.service'
 import { CreateItemDto } from './dto/create-item.dto'
 import { UpdateItemDto } from './dto/update-item.dto'
 import { Response } from 'express'
-// eslint-disable-next-line prettier/prettier
 import {
   Body,
   Controller,
@@ -10,16 +9,21 @@ import {
   Get,
   HttpStatus,
   Param,
+  ParseUUIDPipe,
   Patch,
   Post,
   Res,
+  UsePipes,
 } from '@nestjs/common'
+import { ZodValidationPipe } from './pipes/validation'
+import { createItemSchema } from './schema/item'
 
 @Controller('items')
 export class ItemsController {
   constructor(private readonly itemsService: ItemsService) {}
 
   @Post()
+  @UsePipes(new ZodValidationPipe(createItemSchema))
   create(@Res() res: Response, @Body() createItemDto: CreateItemDto) {
     const newItem = this.itemsService.create(createItemDto)
     res.status(HttpStatus.CREATED).json(newItem)
@@ -30,18 +34,21 @@ export class ItemsController {
     return this.itemsService.findAll()
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.itemsService.findOne(id)
+  @Get(':uuid')
+  findOne(@Param('uuid', new ParseUUIDPipe()) uuid: string) {
+    return this.itemsService.findOne(uuid)
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateItemDto: UpdateItemDto) {
-    return this.itemsService.update(+id, updateItemDto)
+  @Patch(':uuid')
+  update(
+    @Param('uuid', new ParseUUIDPipe()) uuid: string,
+    @Body() updateItemDto: UpdateItemDto,
+  ) {
+    return this.itemsService.update(uuid, updateItemDto)
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.itemsService.remove(+id)
+  @Delete(':uuid')
+  remove(@Param('uuid', new ParseUUIDPipe()) uuid: string) {
+    return this.itemsService.remove(uuid)
   }
 }
