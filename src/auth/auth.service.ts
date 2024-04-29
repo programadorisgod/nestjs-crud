@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import AuthResponse from './interfaces/auth.interface'
 import { ROLES } from './constants/roles'
+
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) {}
